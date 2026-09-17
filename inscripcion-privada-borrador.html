@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inscripción privada — Ikaruga</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#26241f;
+    --ink-soft:#57534a;
+    --paper:#f6f2e9;
+    --paper-raised:#ffffff;
+    --line:#ded6c3;
+    --accent:#a13d2c;
+    --accent-soft:#f0dcd3;
+    --accent-ink:#7d2e20;
+    --field-bg:#fffdf8;
+    --focus:#3b5a63;
+    font-family: 'Inter', sans-serif;
+  }
+  :root:not([data-theme="light"]){
+    @media (prefers-color-scheme: dark){
+      --ink:#ece7db;
+      --ink-soft:#b8b1a1;
+      --paper:#1b1912;
+      --paper-raised:#242119;
+      --line:#3a3527;
+      --accent:#e08468;
+      --accent-soft:#3a241d;
+      --accent-ink:#f0a58c;
+      --field-bg:#211e16;
+      --focus:#7fa3ad;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ink:#ece7db;
+    --ink-soft:#b8b1a1;
+    --paper:#1b1912;
+    --paper-raised:#242119;
+    --line:#3a3527;
+    --accent:#e08468;
+    --accent-soft:#3a241d;
+    --accent-ink:#f0a58c;
+    --field-bg:#211e16;
+    --focus:#7fa3ad;
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{
+    max-width:780px;
+    margin:0 auto;
+    padding:56px 24px 100px;
+  }
+  header.hero{
+    margin-bottom:48px;
+    border-bottom:1px solid var(--line);
+    padding-bottom:36px;
+  }
+  .kicker{
+    font-size:13px;
+    color:var(--accent-ink);
+    letter-spacing:.04em;
+    margin-bottom:10px;
+  }
+  h1{
+    font-family:'Shippori Mincho',serif;
+    font-weight:600;
+    font-size:clamp(30px,5vw,42px);
+    line-height:1.2;
+    margin:0 0 16px;
+    max-width:16ch;
+  }
+  .lede{
+    font-size:16px;
+    color:var(--ink-soft);
+    max-width:60ch;
+    margin:0;
+  }
+  .lede strong{color:var(--ink); font-weight:600;}
+
+  section.block{
+    margin-bottom:44px;
+  }
+  .block-title{
+    font-family:'Shippori Mincho',serif;
+    font-size:21px;
+    font-weight:600;
+    margin:0 0 4px;
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+  }
+  .block-num{
+    color:var(--accent);
+    font-family:'Inter',sans-serif;
+    font-size:13px;
+    font-weight:600;
+    border:1px solid var(--accent);
+    border-radius:50%;
+    width:22px;height:22px;
+    display:inline-flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+  }
+  .block-hint{
+    font-size:13.5px;
+    color:var(--ink-soft);
+    margin:0 0 20px;
+    max-width:56ch;
+  }
+
+  .field{margin-bottom:18px;}
+  .field label{
+    display:block;
+    font-size:13.5px;
+    font-weight:600;
+    margin-bottom:7px;
+    color:var(--ink);
+  }
+  .field .optional{
+    font-weight:400;
+    color:var(--ink-soft);
+  }
+  input[type=text], input[type=email], input[type=tel], input[type=number], select, textarea{
+    width:100%;
+    padding:11px 13px;
+    background:var(--field-bg);
+    border:1px solid var(--line);
+    border-radius:3px;
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    font-size:14.5px;
+    transition:border-color .15s ease;
+  }
+  input:focus, select:focus, textarea:focus{
+    outline:none;
+    border-color:var(--focus);
+  }
+  textarea{resize:vertical; min-height:72px;}
+  .row2{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  @media (max-width:560px){ .row2{grid-template-columns:1fr;} }
+
+  .pill-group{display:flex; flex-wrap:wrap; gap:8px;}
+  .pill{
+    border:1px solid var(--line);
+    background:var(--field-bg);
+    padding:9px 15px;
+    border-radius:20px;
+    font-size:14px;
+    cursor:pointer;
+    color:var(--ink-soft);
+    user-select:none;
+    transition: all .15s ease;
+  }
+  .pill input{position:absolute; opacity:0; width:0; height:0;}
+  .pill.active{
+    background:var(--accent-soft);
+    border-color:var(--accent);
+    color:var(--accent-ink);
+    font-weight:600;
+  }
+
+  .price-box{
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:24px 26px;
+    position:sticky;
+    top:20px;
+  }
+  .price-box .label{
+    font-size:12.5px;
+    text-transform:none;
+    letter-spacing:.02em;
+    color:var(--ink-soft);
+    margin-bottom:4px;
+  }
+  .price-box .amount{
+    font-family:'Shippori Mincho',serif;
+    font-size:36px;
+    font-weight:600;
+    color:var(--accent-ink);
+    margin:0 0 14px;
+  }
+  .price-lines{
+    font-size:13.5px;
+    color:var(--ink-soft);
+    border-top:1px solid var(--line);
+    padding-top:12px;
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+  }
+  .price-lines .row{display:flex; justify-content:space-between; gap:10px;}
+  .price-lines .row span:last-child{color:var(--ink); font-weight:500;}
+  .price-note{
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-top:12px;
+    line-height:1.5;
+  }
+
+  .cta{
+    width:100%;
+    padding:15px 20px;
+    background:var(--accent);
+    color:#fff;
+    border:none;
+    border-radius:3px;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    margin-top:8px;
+    font-family:'Inter',sans-serif;
+  }
+  .cta:hover{background:var(--accent-ink);}
+  .cta:disabled{background:var(--line); color:var(--ink-soft); cursor:not-allowed;}
+
+  .summary{
+    display:none;
+    margin-top:40px;
+    border-top:1px solid var(--line);
+    padding-top:32px;
+  }
+  .summary.show{display:block;}
+  .summary h2{
+    font-family:'Shippori Mincho',serif;
+    font-size:22px;
+    margin:0 0 6px;
+  }
+  .summary p.sub{color:var(--ink-soft); font-size:14px; margin:0 0 20px;}
+  .summary-card{
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:20px 22px;
+    font-size:13.5px;
+    white-space:pre-wrap;
+    font-family:'Inter',sans-serif;
+    color:var(--ink);
+    line-height:1.7;
+  }
+  .actions{display:flex; gap:10px; margin-top:16px; flex-wrap:wrap;}
+  .btn-secondary{
+    flex:1;
+    min-width:160px;
+    padding:12px 16px;
+    background:var(--field-bg);
+    border:1px solid var(--line);
+    border-radius:3px;
+    color:var(--ink);
+    font-size:14px;
+    font-weight:600;
+    cursor:pointer;
+    text-align:center;
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .btn-secondary:hover{border-color:var(--focus);}
+
+  footer.disclaimer{
+    margin-top:56px;
+    font-size:12px;
+    color:var(--ink-soft);
+    border-top:1px solid var(--line);
+    padding-top:18px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <div class="kicker">Ikaruga · Clases de idiomas — Jorge Frías</div>
+    <h1>Plan privado premium</h1>
+    <p class="lede">Como la diferencia horaria no permite coordinar la entrevista grupal habitual, completá este formulario vos mismo/a. Al final vas a ver el <strong>precio estimado</strong> de tu clase 1 a 1.</p>
+  </header>
+
+  <section class="block" style="border-bottom:1px solid var(--line); padding-bottom:36px;">
+    <h2 class="block-title" style="margin-bottom:16px;">Qué incluye</h2>
+    <div class="row2" style="row-gap:20px;">
+      <div class="field" style="margin-bottom:0;">
+        <label style="margin-bottom:4px;">100% personalizado</label>
+        <p class="block-hint" style="margin:0;">Un docente diseña el plan, el vocabulario y las lecciones según tu objetivo puntual: viaje, trabajo, examen internacional o proyecto personal.</p>
+      </div>
+      <div class="field" style="margin-bottom:0;">
+        <label style="margin-bottom:4px;">Horario a tu medida</label>
+        <p class="block-hint" style="margin:0;">Elegís día y horario. Queda fijo durante la cursada, con posibilidad de reprogramar a mitad de camino si tu agenda cambia.</p>
+      </div>
+      <div class="field" style="margin-bottom:0;">
+        <label style="margin-bottom:4px;">Ritmo acelerado</label>
+        <p class="block-hint" style="margin:0;">Pack de 30 hs pensado para completarse en unos 2 meses y medio, avanzando a tu propio ritmo sin depender de un grupo.</p>
+      </div>
+      <div class="field" style="margin-bottom:0;">
+        <label style="margin-bottom:4px;">Campus virtual 24/7</label>
+        <p class="block-hint" style="margin:0;">Acceso ilimitado a la plataforma con lecciones, audios, lecturas y ejercicios con corrección automática — reemplaza el libro de texto.</p>
+      </div>
+      <div class="field" style="margin-bottom:0;">
+        <label style="margin-bottom:4px;">Nivelación inicial sin cargo</label>
+        <p class="block-hint" style="margin:0;">Antes de empezar hacemos una entrevista de localización gratuita para armar tu plan de estudio exacto desde el día uno.</p>
+      </div>
+      <div class="field" style="margin-bottom:0;">
+        <label style="margin-bottom:4px;">Atención prioritaria</label>
+        <p class="block-hint" style="margin:0;">Seguimiento docente continuo y respuesta administrativa inmediata ante cualquier duda o gestión.</p>
+      </div>
+    </div>
+  </section>
+
+  <form id="form">
+
+    <section class="block">
+      <h2 class="block-title"><span class="block-num">1</span>Curso</h2>
+      <p class="block-hint">Elegí el idioma. El precio de la modalidad privada varía según el idioma.</p>
+      <div class="field">
+        <label for="idioma">Idioma a estudiar</label>
+        <select id="idioma" required>
+          <option value="" disabled selected>Elegí un idioma</option>
+          <optgroup label="Grupo A">
+            <option value="A" data-type="asia">Japonés</option>
+            <option value="A" data-type="asia">Coreano</option>
+            <option value="A" data-type="asia">Chino</option>
+            <option value="A" data-type="asia">Tailandés</option>
+            <option value="A" data-type="euro">Alemán</option>
+          </optgroup>
+          <optgroup label="Grupo B">
+            <option value="B" data-type="euro">Inglés</option>
+            <option value="B" data-type="euro">Italiano</option>
+            <option value="B" data-type="euro">Portugués</option>
+          </optgroup>
+          <option value="OTRO" data-type="">Otro idioma (a consultar)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="nivel">Nivel <span class="optional">— si no sabés, elegí "no sabe / requiere nivelación"</span></label>
+        <select id="nivel">
+          <option data-type="euro">A1</option>
+          <option data-type="euro">A2</option>
+          <option data-type="euro">B1</option>
+          <option data-type="euro">B2</option>
+          <option data-type="euro">C1</option>
+          <option data-type="asia">I</option>
+          <option data-type="asia">II</option>
+          <option data-type="asia">III</option>
+          <option data-type="asia">IV</option>
+          <option data-type="" selected>No sabe / requiere test de nivelación</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2 class="block-title"><span class="block-num">2</span>Modalidad</h2>
+      <p class="block-hint">Cantidad de horas contratadas y si las clases son para una persona o para dos (ej. pareja, familiares) tomando la clase juntas.</p>
+      <div class="field">
+        <label>Horas del curso</label>
+        <div class="pill-group" id="horas-group">
+          <label class="pill active"><input type="radio" name="horas" value="30" checked>30 horas</label>
+          <label class="pill"><input type="radio" name="horas" value="60">60 horas</label>
+        </div>
+      </div>
+      <div class="field">
+        <label>Cantidad de alumnos <span class="optional">— individual o grupo privado cerrado (hasta 3)</span></label>
+        <div class="pill-group" id="alumnos-group">
+          <label class="pill active"><input type="radio" name="alumnos" value="1" checked>1 (individual)</label>
+          <label class="pill"><input type="radio" name="alumnos" value="2">2 (−30%)</label>
+          <label class="pill"><input type="radio" name="alumnos" value="3">3 (−50%)</label>
+        </div>
+      </div>
+      <div class="field">
+        <label for="pais">País donde residís</label>
+        <select id="pais">
+          <option value="" disabled selected>Elegí tu país</option>
+          <option value="Argentina">Argentina</option>
+          <optgroup label="Latinoamérica">
+            <option value="Bolivia">Bolivia</option>
+            <option value="Brasil">Brasil</option>
+            <option value="Chile">Chile</option>
+            <option value="Colombia">Colombia</option>
+            <option value="Costa Rica">Costa Rica</option>
+            <option value="Cuba">Cuba</option>
+            <option value="Ecuador">Ecuador</option>
+            <option value="El Salvador">El Salvador</option>
+            <option value="Guatemala">Guatemala</option>
+            <option value="Haití">Haití</option>
+            <option value="Honduras">Honduras</option>
+            <option value="México">México</option>
+            <option value="Nicaragua">Nicaragua</option>
+            <option value="Panamá">Panamá</option>
+            <option value="Paraguay">Paraguay</option>
+            <option value="Perú">Perú</option>
+            <option value="República Dominicana">República Dominicana</option>
+            <option value="Uruguay">Uruguay</option>
+            <option value="Venezuela">Venezuela</option>
+          </optgroup>
+          <optgroup label="Europa">
+            <option value="España">España</option>
+            <option value="Suiza">Suiza</option>
+            <option value="Alemania">Alemania</option>
+            <option value="Francia">Francia</option>
+            <option value="Italia">Italia</option>
+            <option value="Portugal">Portugal</option>
+            <option value="Países Bajos">Países Bajos</option>
+            <option value="Bélgica">Bélgica</option>
+            <option value="Austria">Austria</option>
+            <option value="Irlanda">Irlanda</option>
+            <option value="Reino Unido">Reino Unido</option>
+          </optgroup>
+          <optgroup label="Otros">
+            <option value="Estados Unidos">Estados Unidos</option>
+            <option value="Canadá">Canadá</option>
+            <option value="Japón">Japón</option>
+            <option value="Corea del Sur">Corea del Sur</option>
+            <option value="China">China</option>
+            <option value="Australia">Australia</option>
+            <option value="Nueva Zelanda">Nueva Zelanda</option>
+            <option value="Otro">Otro país</option>
+          </optgroup>
+        </select>
+      </div>
+      <div class="field" id="otroPaisField" style="display:none;">
+        <label for="otroPais">Especificá tu país</label>
+        <input type="text" id="otroPais">
+      </div>
+      <div class="field" id="factura-field" style="display:none;">
+        <label class="pill" style="display:inline-flex; align-items:center; gap:8px;">
+          <input type="checkbox" id="sinFactura" style="position:static; opacity:1; width:auto; height:auto;">
+          Sin factura (-20% sobre el valor de las 30 hs)
+        </label>
+      </div>
+      <div class="field">
+        <label for="horario">Horario y día en que necesitás recibir las clases</label>
+        <textarea id="horario" placeholder="Ej: Lunes y miércoles 19:00 hora Suiza"></textarea>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2 class="block-title"><span class="block-num">3</span>Sobre vos</h2>
+      <div class="field">
+        <label for="objetivos">¿Cuáles son tus objetivos para tomar este curso?</label>
+        <textarea id="objetivos"></textarea>
+      </div>
+      <div class="field">
+        <label for="requerimientos">¿Tenés algún requerimiento que quieras comentarnos? <span class="optional">(opcional)</span></label>
+        <textarea id="requerimientos"></textarea>
+      </div>
+      <div class="field">
+        <label for="capacidades">¿Alguna condición o capacidad especial que sea importante que sepamos? <span class="optional">(opcional)</span></label>
+        <textarea id="capacidades" placeholder="Ej: Asperger, autismo, TDA, etc."></textarea>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2 class="block-title"><span class="block-num">4</span>Datos personales</h2>
+      <div class="row2">
+        <div class="field">
+          <label for="nombre">Nombre y apellido</label>
+          <input type="text" id="nombre" required>
+        </div>
+        <div class="field">
+          <label for="dni">DNI / N° de identificación</label>
+          <input type="text" id="dni">
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label for="edad">Edad</label>
+          <input type="number" id="edad" min="1">
+        </div>
+        <div class="field">
+          <label for="ciudad">Ciudad</label>
+          <input type="text" id="ciudad">
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label for="email">Email</label>
+          <input type="email" id="email" required>
+        </div>
+        <div class="field">
+          <label for="whatsapp">WhatsApp (con código de país)</label>
+          <input type="tel" id="whatsapp" placeholder="+41 ...">
+        </div>
+      </div>
+      <div class="field">
+        <label for="entero">¿Cómo te enteraste de Ikaruga? <span class="optional">(opcional)</span></label>
+        <input type="text" id="entero">
+      </div>
+    </section>
+
+    <section class="block">
+      <h2 class="block-title"><span class="block-num">5</span>Tu precio estimado</h2>
+      <div class="price-box">
+        <div class="label" id="price-label">Grupo A · 30 hs · 1 persona · USD</div>
+        <div class="amount" id="price-amount">USD 1.247</div>
+        <div class="price-lines" id="price-lines">
+          <div class="row"><span>30 hs</span><span>USD 1.170</span></div>
+          <div class="row"><span>Matrícula</span><span>USD 77</span></div>
+        </div>
+        <p class="price-note" id="price-note">Precio de referencia para alumnos fuera de Argentina, en dólares. Sujeto a confirmación final por Jorge.</p>
+      </div>
+    </section>
+
+    <button type="submit" class="cta" id="submitBtn">Ver resumen de mi inscripción</button>
+  </form>
+
+  <div class="summary" id="summary">
+    <h2>Resumen listo</h2>
+    <p class="sub">Esto todavía no se envió a ningún lado. Copialo o mandalo por WhatsApp / email para que Jorge lo reciba y confirme la inscripción.</p>
+    <div class="summary-card" id="summaryText"></div>
+    <div class="actions">
+      <button class="btn-secondary" id="copyBtn" type="button">Copiar resumen</button>
+      <a class="btn-secondary" id="waLink" href="#" target="_blank" rel="noopener">Enviar por WhatsApp</a>
+      <a class="btn-secondary" id="mailLink" href="#">Enviar por email</a>
+    </div>
+  </div>
+
+  <footer class="disclaimer">
+    Borrador experimental — no está conectado al sistema de inscripciones de Ikaruga. Los datos completados acá no se envían ni se guardan automáticamente en ningún lado; el resumen final se comparte manualmente por WhatsApp o email.
+  </footer>
+
+</div>
+
+<script>
+  const PRICES = {
+    A: { rate30: 1170, matricula: 77, currency: 'USD' },
+    B: { rate30: 700, matricula: 77, currency: 'USD' },
+    ARS: { rate30: 1050000, matricula: 119000, currency: 'ARS' }
+  };
+
+  const idiomaSel = document.getElementById('idioma');
+  const nivelSel = document.getElementById('nivel');
+  const paisSel = document.getElementById('pais');
+  const otroPaisField = document.getElementById('otroPaisField');
+  const otroPaisInput = document.getElementById('otroPais');
+  const facturaField = document.getElementById('factura-field');
+  const sinFacturaChk = document.getElementById('sinFactura');
+
+  function updateNivelOptions(){
+    const opt = idiomaSel.options[idiomaSel.selectedIndex];
+    const type = opt ? opt.getAttribute('data-type') : '';
+    let firstVisibleValue = null;
+    Array.from(nivelSel.options).forEach(o => {
+      const oType = o.getAttribute('data-type');
+      const visible = !oType || !type || oType === type;
+      o.hidden = !visible;
+      if (visible && firstVisibleValue === null) firstVisibleValue = o.value || o.text;
+    });
+    const currentVisible = !nivelSel.options[nivelSel.selectedIndex].hidden;
+    if (!currentVisible) {
+      const firstVisible = Array.from(nivelSel.options).find(o => !o.hidden);
+      if (firstVisible) nivelSel.value = firstVisible.value || firstVisible.text;
+    }
+  }
+  idiomaSel.addEventListener('change', updateNivelOptions);
+  updateNivelOptions();
+
+  paisSel.addEventListener('change', () => {
+    otroPaisField.style.display = (paisSel.value === 'Otro') ? 'block' : 'none';
+    computePrice();
+  });
+  otroPaisInput.addEventListener('input', computePrice);
+
+  function isArgentina(){
+    return paisSel.value === 'Argentina';
+  }
+
+  function fmt(n, currency){
+    return currency + ' ' + Math.round(n).toLocaleString('es-AR');
+  }
+
+  function getSelectedLangGroup(){
+    return idiomaSel.value; // 'A' | 'B' | 'OTRO'
+  }
+
+  // Descuento por escala: individual sin descuento (salvo 60hs), 2 personas -30%, 3 personas -50%
+  function getDiscountPct(alumnos, horas){
+    if (alumnos >= 3) return 0.5;
+    if (alumnos === 2) return 0.3;
+    if (horas === '60') return 0.3;
+    return 0;
+  }
+
+  function computePrice(){
+    const horas = document.querySelector('input[name=horas]:checked').value;
+    const alumnos = parseInt(document.querySelector('input[name=alumnos]:checked').value, 10);
+    const group = getSelectedLangGroup();
+    const argentina = isArgentina();
+
+    facturaField.style.display = argentina ? 'block' : 'none';
+
+    if (!group) {
+      document.getElementById('price-label').textContent = 'Elegí un idioma para ver el precio';
+      document.getElementById('price-amount').textContent = '—';
+      document.getElementById('price-lines').innerHTML = '';
+      document.getElementById('price-note').textContent = '';
+      return null;
+    }
+
+    if (group === 'OTRO') {
+      document.getElementById('price-label').textContent = 'Precio a consultar';
+      document.getElementById('price-amount').textContent = 'A confirmar';
+      document.getElementById('price-lines').innerHTML = '';
+      document.getElementById('price-note').textContent = 'Este idioma no tiene precio automático — Jorge te lo confirma directamente.';
+      return { toConsult: true };
+    }
+
+    const base = argentina ? PRICES.ARS : (group === 'A' ? PRICES.A : PRICES.B);
+    const currency = base.currency;
+    const blocks = (parseInt(horas,10) / 30) * alumnos;
+    const discountPct = getDiscountPct(alumnos, horas);
+    let blockRate = base.rate30 * (1 - discountPct);
+
+    let sinFacturaApplied = false;
+    if (argentina && sinFacturaChk.checked) {
+      blockRate = blockRate * 0.8;
+      sinFacturaApplied = true;
+    }
+
+    const cursoTotal = blocks * blockRate;
+    const matriculaTotal = base.matricula * alumnos;
+    const total = cursoTotal + matriculaTotal;
+
+    document.getElementById('price-label').textContent =
+      (group === 'A' ? 'Grupo A' : 'Grupo B') + ' · ' + horas + ' hs · ' + alumnos + (alumnos>1?' personas':' persona') + ' · ' + currency;
+    document.getElementById('price-amount').textContent = fmt(total, currency);
+    document.getElementById('price-lines').innerHTML = `
+      <div class="row"><span>${horas} hs${discountPct>0 ? ' (−' + Math.round(discountPct*100) + '%)' : ''}</span><span>${fmt(cursoTotal, currency)}</span></div>
+      <div class="row"><span>Matrícula${alumnos>1?' (x'+alumnos+')':''}</span><span>${fmt(matriculaTotal, currency)}</span></div>
+      ${sinFacturaApplied ? '<div class="row"><span>Incluye -20% sin factura</span><span></span></div>' : ''}
+    `;
+    document.getElementById('price-note').textContent = argentina
+      ? 'Precio en pesos argentinos, elegido como forma de pago. Sujeto a confirmación final por Jorge.'
+      : 'Precio en dólares. Sujeto a confirmación final por Jorge.';
+
+    return { total, currency, cursoTotal, matriculaTotal, horas, alumnos, group, sinFacturaApplied };
+  }
+
+  document.querySelectorAll('#horas-group input, #alumnos-group input').forEach(inp => {
+    inp.addEventListener('change', () => {
+      inp.closest('.pill-group').querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+      inp.closest('.pill').classList.add('active');
+      computePrice();
+    });
+  });
+  idiomaSel.addEventListener('change', computePrice);
+  sinFacturaChk.addEventListener('change', computePrice);
+
+  computePrice();
+
+  document.getElementById('form').addEventListener('submit', function(e){
+    e.preventDefault();
+    const p = computePrice();
+    const idiomaTexto = idiomaSel.options[idiomaSel.selectedIndex] ? idiomaSel.options[idiomaSel.selectedIndex].text : '';
+    const nivel = document.getElementById('nivel').value;
+    const horas = document.querySelector('input[name=horas]:checked').value;
+    const alumnos = document.querySelector('input[name=alumnos]:checked').value;
+    const pais = paisSel.value === 'Otro' ? (otroPaisInput.value || 'Otro') : paisSel.value;
+    const horario = document.getElementById('horario').value;
+    const objetivos = document.getElementById('objetivos').value;
+    const requerimientos = document.getElementById('requerimientos').value;
+    const capacidades = document.getElementById('capacidades').value;
+    const nombre = document.getElementById('nombre').value;
+    const dni = document.getElementById('dni').value;
+    const edad = document.getElementById('edad').value;
+    const ciudad = document.getElementById('ciudad').value;
+    const email = document.getElementById('email').value;
+    const whatsapp = document.getElementById('whatsapp').value;
+    const entero = document.getElementById('entero').value;
+
+    let precioLinea = 'A consultar con Jorge';
+    if (p && !p.toConsult) {
+      precioLinea = fmt(p.total, p.currency) + ' (curso ' + fmt(p.cursoTotal, p.currency) + ' + matrícula ' + fmt(p.matriculaTotal, p.currency) + ')' + (p.sinFacturaApplied ? ' — incluye -20% sin factura' : '');
+    }
+
+    const text =
+`INSCRIPCIÓN PRIVADA — IKARUGA
+Idioma: ${idiomaTexto} | Nivel: ${nivel}
+Horas: ${horas} hs | Alumnos: ${alumnos}
+País: ${pais}
+Horario deseado: ${horario || '-'}
+
+Objetivos: ${objetivos || '-'}
+Requerimientos: ${requerimientos || '-'}
+Capacidades especiales: ${capacidades || '-'}
+
+Nombre: ${nombre}
+DNI/ID: ${dni || '-'}
+Edad: ${edad || '-'}
+Ciudad: ${ciudad || '-'}
+Email: ${email}
+WhatsApp: ${whatsapp || '-'}
+Cómo se enteró: ${entero || '-'}
+
+PRECIO ESTIMADO: ${precioLinea}
+(Forma de pago y cuotas: a coordinar directamente con Jorge)`;
+
+    document.getElementById('summaryText').textContent = text;
+    document.getElementById('summary').classList.add('show');
+    document.getElementById('summary').scrollIntoView({behavior:'smooth', block:'start'});
+
+    document.getElementById('waLink').href = 'https://wa.me/?text=' + encodeURIComponent(text);
+    document.getElementById('mailLink').href = 'mailto:?subject=' + encodeURIComponent('Inscripción privada — ' + nombre) + '&body=' + encodeURIComponent(text);
+  });
+
+  document.getElementById('copyBtn').addEventListener('click', async () => {
+    try{
+      await navigator.clipboard.writeText(document.getElementById('summaryText').textContent);
+      const btn = document.getElementById('copyBtn');
+      const original = btn.textContent;
+      btn.textContent = 'Copiado ✓';
+      setTimeout(()=> btn.textContent = original, 1500);
+    }catch(e){
+      alert('No se pudo copiar automáticamente. Seleccioná el texto manualmente.');
+    }
+  });
+</script>
+</body>
+</html>
