@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ikaruga · Recontacto</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+  :root {
+    --paper: #F7F5F0;
+    --paper-raised: #FFFFFF;
+    --ink: #23241F;
+    --ink-soft: #5B5C55;
+    --line: #DEDACD;
+    --teal: #1E6B63;
+    --teal-deep: #14514A;
+    --gold: #B4872B;
+    --danger: #A8412F;
+    --radius-card: 14px;
+    --radius-field: 8px;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #191A17;
+      --paper-raised: #232420;
+      --ink: #F0EEE6;
+      --ink-soft: #A9A99E;
+      --line: #383930;
+      --teal: #4FA89C;
+      --teal-deep: #6FC0B4;
+      --gold: #D9B15C;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #191A17;
+    --paper-raised: #232420;
+    --ink: #F0EEE6;
+    --ink-soft: #A9A99E;
+    --line: #383930;
+    --teal: #4FA89C;
+    --teal-deep: #6FC0B4;
+    --gold: #D9B15C;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+    line-height: 1.5;
+    min-height: 100%;
+  }
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 32px 20px 64px;
+  }
+  header.top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 28px;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+  h1 span.torii { font-size: 22px; margin-right: 6px; }
+  .tagline {
+    color: var(--ink-soft);
+    font-size: 14px;
+    margin-top: 4px;
+  }
+  .rep-field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+  .rep-field input {
+    width: 150px;
+  }
+  section {
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-card);
+    padding: 22px;
+    margin-bottom: 22px;
+  }
+  section h2 {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 18px;
+    margin: 0 0 16px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr 1fr;
+    gap: 12px;
+  }
+  @media (max-width: 620px) {
+    .grid { grid-template-columns: 1fr 1fr; }
+    .grid .full { grid-column: 1 / -1; }
+  }
+  label {
+    display: block;
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-bottom: 5px;
+  }
+  input, select {
+    width: 100%;
+    padding: 9px 10px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-field);
+    background: var(--paper);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 14px;
+  }
+  input:focus, select:focus, button:focus-visible {
+    outline: 2px solid var(--teal);
+    outline-offset: 1px;
+  }
+  .field { margin-bottom: 0; }
+  .templates {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    margin-top: 14px;
+  }
+  @media (max-width: 620px) { .templates { grid-template-columns: 1fr; } }
+  .tpl-option {
+    border: 1px solid var(--line);
+    border-radius: var(--radius-field);
+    padding: 10px 12px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--ink-soft);
+    transition: border-color .15s ease, color .15s ease;
+  }
+  .tpl-option input { display: none; }
+  .tpl-option.selected {
+    border-color: var(--teal);
+    color: var(--ink);
+    background: color-mix(in srgb, var(--teal) 8%, transparent);
+  }
+  .tpl-option strong { display: block; color: var(--ink); font-size: 13px; margin-bottom: 2px; }
+  .actions-row { margin-top: 16px; display: flex; gap: 10px; }
+  button {
+    font-family: inherit;
+    font-size: 14px;
+    border-radius: var(--radius-field);
+    border: 1px solid transparent;
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: opacity .15s ease;
+  }
+  button.primary { background: var(--teal); color: #fff; }
+  button.primary:hover { opacity: .9; }
+  button.ghost {
+    background: transparent;
+    border-color: var(--line);
+    color: var(--ink);
+  }
+  button.ghost:hover { border-color: var(--ink-soft); }
+  button.text {
+    background: transparent;
+    border: none;
+    color: var(--ink-soft);
+    padding: 6px 8px;
+    font-size: 13px;
+  }
+  button.text:hover { color: var(--danger); }
+  .count-pill {
+    font-size: 12px;
+    color: var(--ink-soft);
+    font-weight: 500;
+  }
+  .empty {
+    text-align: center;
+    padding: 30px 10px;
+    color: var(--ink-soft);
+    font-size: 14px;
+  }
+  .card {
+    border: 1px solid var(--line);
+    border-radius: var(--radius-card);
+    padding: 16px 18px;
+    margin-bottom: 12px;
+    background: var(--paper);
+  }
+  .card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .card-title { font-weight: 600; font-size: 15px; }
+  .card-meta { font-size: 12px; color: var(--ink-soft); margin-top: 2px; }
+  .card-meta .dot { margin: 0 5px; }
+  .msg-box {
+    white-space: pre-wrap;
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-field);
+    padding: 12px 13px;
+    font-size: 13.5px;
+    line-height: 1.55;
+    margin-bottom: 10px;
+    max-height: 220px;
+    overflow-y: auto;
+  }
+  .card-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .card-actions button { padding: 7px 13px; font-size: 13px; }
+  .card-actions a.wa-link {
+    display: inline-block;
+    text-decoration: none;
+    padding: 7px 13px;
+    font-size: 13px;
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-field);
+    color: var(--ink);
+  }
+  .card-actions a.wa-link:hover { border-color: var(--ink-soft); }
+  .copied-flag {
+    font-size: 12px;
+    color: var(--teal-deep);
+    font-weight: 500;
+    opacity: 0;
+    transition: opacity .2s ease;
+  }
+  .copied-flag.show { opacity: 1; }
+  .filter-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+  .filter-tab {
+    padding: 6px 13px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: transparent;
+    font-size: 13px;
+    color: var(--ink-soft);
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .filter-tab.active { background: var(--teal); border-color: var(--teal); color: #fff; }
+  .filter-tab:hover:not(.active) { border-color: var(--ink-soft); }
+  .card.sent { opacity: .58; }
+  .card.sent .msg-box { max-height: 90px; }
+  .sent-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--teal-deep);
+    background: color-mix(in srgb, var(--teal) 16%, transparent);
+    padding: 2px 9px;
+    border-radius: 999px;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+  .preview-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .preview-table th, .preview-table td {
+    padding: 5px 8px;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 220px;
+  }
+  .preview-table th { color: var(--ink-soft); font-weight: 500; }
+  .preview-wrap { overflow-x: auto; }
+  footer.hint {
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 12px;
+    margin-top: 24px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1><span class="torii">⛩️</span>Ikaruga · Recontacto</h1>
+      <div class="tagline">Cargá un contacto y llevate el mensaje listo para pegar.</div>
+    </div>
+    <div class="rep-field">
+      <span id="syncStatus" style="font-size:12px; color:var(--ink-soft);">💾 Verificando sincronización…</span>
+      <label for="repName" style="margin:0;">Firmás como</label>
+      <input id="repName" type="text" placeholder="Tu nombre">
+    </div>
+  </header>
+
+  <section>
+    <h2>Importar varios desde tu planilla</h2>
+    <p style="font-size:13px; color:var(--ink-soft); margin-top:-8px; margin-bottom:12px;">
+      Pegá las filas tal cual las tenés en tu planilla, con todas las columnas que tenga (nombre, motivo, mail, teléfono, país, idioma, lo que sea). Después te pregunto cuál columna es cuál.
+    </p>
+    <textarea id="bulkText" rows="5" placeholder="Pegá acá las filas copiadas de tu planilla..." style="width:100%; padding:10px 11px; border:1px solid var(--line); border-radius:8px; background:var(--paper); color:var(--ink); font-family:inherit; font-size:13.5px; resize:vertical;"></textarea>
+    <div class="actions-row" style="align-items:center;">
+      <button class="ghost" id="detectBtn">Detectar columnas</button>
+      <select id="delimSelect" style="width:auto;">
+        <option value="auto">Separador: automático</option>
+        <option value="\t">Separador: tabulación</option>
+        <option value=",">Separador: coma</option>
+      </select>
+      <span class="count-pill" id="bulkFlag"></span>
+    </div>
+
+    <div id="mappingBox" style="display:none; margin-top:16px;">
+      <div class="grid">
+        <div class="field">
+          <label for="mapNombre">¿Cuál columna es el Nombre?</label>
+          <select id="mapNombre"></select>
+        </div>
+        <div class="field">
+          <label for="mapTelefono">¿Cuál es el Teléfono?</label>
+          <select id="mapTelefono"></select>
+        </div>
+        <div class="field">
+          <label for="mapIdioma">¿Cuál es el Idioma? (si hay)</label>
+          <select id="mapIdioma"></select>
+        </div>
+      </div>
+      <p style="font-size:12px; color:var(--ink-soft); margin:12px 0 6px;">Revisá que cada fila haya quedado bien antes de importar:</p>
+      <div class="preview-wrap"><div id="previewBox"></div></div>
+      <div class="actions-row">
+        <button class="primary" id="bulkAddBtn">Importar</button>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Nuevo contacto</h2>
+    <div class="grid">
+      <div class="field">
+        <label for="fNombre">Nombre</label>
+        <input id="fNombre" type="text" placeholder="María">
+      </div>
+      <div class="field">
+        <label for="fTelefono">Teléfono (con cód. país)</label>
+        <input id="fTelefono" type="text" placeholder="5493794123456">
+      </div>
+      <div class="field">
+        <label for="fIdioma">Idioma (si lo tenés)</label>
+        <input id="fIdioma" type="text" placeholder="Inglés">
+      </div>
+    </div>
+
+    <div class="templates" id="templateChooser">
+      <label class="tpl-option selected" data-tpl="1">
+        <input type="radio" name="tpl" value="1" checked>
+        <strong>Corta y directa</strong>
+        Va al punto, pide llamada o chat.
+      </label>
+      <label class="tpl-option" data-tpl="2">
+        <input type="radio" name="tpl" value="2">
+        <strong>Con Instagram</strong>
+        Suma el link de Ikaruga al final.
+      </label>
+      <label class="tpl-option" data-tpl="3">
+        <input type="radio" name="tpl" value="3">
+        <strong>Con urgencia</strong>
+        Menciona próximos grupos, pide datos ya.
+      </label>
+    </div>
+
+    <div class="actions-row">
+      <button class="primary" id="addBtn">Agregar contacto</button>
+      <span class="count-pill" id="editingFlag"></span>
+    </div>
+  </section>
+
+  <section>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
+      <h2 style="margin:0;">Contactos</h2>
+      <div class="filter-tabs" id="filterTabs">
+        <button class="filter-tab active" data-filter="pendientes">Pendientes <span id="cntPendientes"></span></button>
+        <button class="filter-tab" data-filter="enviados">Enviados <span id="cntEnviados"></span></button>
+        <button class="filter-tab" data-filter="todos">Todos <span id="cntTodos"></span></button>
+      </div>
+    </div>
+    <div id="list"></div>
+    <div class="empty" id="emptyMsg">Todavía no cargaste ningún contacto.</div>
+  </section>
+
+  <footer class="hint" id="footerHint">Los datos se guardan solo en este navegador, en este dispositivo.</footer>
+</div>
+
+<script>
+(function () {
+  const STORAGE_KEY = 'ikaruga_contacts_v1';
+  const REP_KEY = 'ikaruga_rep_name_v1';
+
+  const $ = (sel) => document.querySelector(sel);
+  const listEl = $('#list');
+  const emptyMsg = $('#emptyMsg');
+  const repNameInput = $('#repName');
+  const editingFlag = $('#editingFlag');
+  const addBtn = $('#addBtn');
+  const cntPendientes = $('#cntPendientes');
+  const cntEnviados = $('#cntEnviados');
+  const cntTodos = $('#cntTodos');
+
+  let editingId = null;
+  let currentFilter = 'pendientes';
+
+  document.querySelectorAll('.filter-tab').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      currentFilter = btn.dataset.filter;
+      document.querySelectorAll('.filter-tab').forEach((b) => b.classList.toggle('active', b === btn));
+      render();
+    });
+  });
+
+  function safeGet(key, fallback) {
+    try {
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : fallback;
+    } catch (e) {
+      return fallback;
+    }
+  }
+  function safeSetRaw(key, value) {
+    try { localStorage.setItem(key, value); } catch (e) { /* ignore */ }
+  }
+
+  let contacts = safeGet(STORAGE_KEY, []).map((c) => ({ sent: false, sentAt: null, ...c }));
+  repNameInput.value = (function () {
+    try { return localStorage.getItem(REP_KEY) || ''; } catch (e) { return ''; }
+  })();
+
+  // --- Sincronización en la nube (Supabase) ---
+  const SUPABASE_URL = 'https://mabrtjqefrjrvagpepwi.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1hYnJ0anFlZnJqcnZhZ3BlcHdpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA0NTcxNzMsImV4cCI6MjEwNjAzMzE3M30.yOtPr6ttni-YuDdrHEaf13iQjkaOhtRxfgwtsxq8-iI';
+
+  let sb = null;
+  let cloudReady = false;
+  let repSaveTimer = null;
+  const syncStatusEl = $('#syncStatus');
+  const footerHint = $('#footerHint');
+
+  function setSyncStatus(mode) {
+    if (mode === 'cloud') {
+      syncStatusEl.textContent = '☁️ Sincronizado';
+      syncStatusEl.title = 'Tus contactos se guardan en tu base de datos y se ven igual desde cualquier dispositivo que abra esta misma página.';
+      footerHint.textContent = 'Sincronizado: abrí esta misma página desde cualquier dispositivo para ver lo mismo, en vivo.';
+    } else {
+      syncStatusEl.textContent = '💾 Solo este dispositivo';
+      syncStatusEl.title = 'No se pudo conectar con la base de datos. Los datos quedan guardados solo en este navegador.';
+      footerHint.textContent = 'Los datos se guardan solo en este navegador, en este dispositivo.';
+    }
+  }
+
+  function cacheLocally() {
+    safeSetRaw(STORAGE_KEY, JSON.stringify(contacts));
+  }
+
+  function contactRow(c) {
+    return {
+      id: c.id,
+      nombre: c.nombre || '',
+      telefono: c.telefono || '',
+      idioma: c.idioma || '',
+      tpl: c.tpl || '1',
+      sent: !!c.sent,
+      sent_at: c.sentAt ? new Date(c.sentAt).toISOString() : null,
+      updated_at: new Date().toISOString()
+    };
+  }
+
+  function rowToContact(row) {
+    return {
+      id: row.id,
+      nombre: row.nombre || '',
+      telefono: row.telefono || '',
+      idioma: row.idioma || '',
+      tpl: row.tpl || '1',
+      sent: !!row.sent,
+      sentAt: row.sent_at ? new Date(row.sent_at).getTime() : null
+    };
+  }
+
+  async function persistContacts(list) {
+    cacheLocally();
+    if (!cloudReady || !list.length) return;
+    try { await sb.from('contacts').upsert(list.map(contactRow)); } catch (e) { /* se reintenta en el próximo cambio */ }
+  }
+
+  async function removeContactCloud(id) {
+    if (!cloudReady) return;
+    try { await sb.from('contacts').delete().eq('id', id); } catch (e) { /* ignore */ }
+  }
+
+  // Compatibilidad con el resto del código: guarda todo localmente
+  // (la sincronización puntual a la nube la hacen persistContacts/removeContactCloud).
+  function saveContacts() {
+    cacheLocally();
+  }
+
+  async function refreshContactsFromCloud() {
+    const { data, error } = await sb.from('contacts').select('*').order('created_at', { ascending: false });
+    if (error) throw error;
+    contacts = (data || []).map(rowToContact);
+    cacheLocally();
+    render();
+  }
+
+  async function initCloud() {
+    if (!window.supabase || typeof window.supabase.createClient !== 'function') {
+      setSyncStatus('local');
+      return;
+    }
+    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    try {
+      // Migración única: si la nube todavía no tiene nada y este dispositivo
+      // ya tenía contactos guardados localmente, los subimos.
+      const { data: existing, error: readErr } = await sb.from('contacts').select('id').limit(1);
+      if (readErr) throw readErr;
+      if (!existing.length && contacts.length) {
+        await sb.from('contacts').upsert(contacts.map(contactRow));
+      }
+
+      const { data: settingsRow } = await sb.from('settings').select('rep_name').eq('id', 'default').maybeSingle();
+      if (!existing.length && (!settingsRow || !settingsRow.rep_name) && repNameInput.value.trim()) {
+        await sb.from('settings').upsert({ id: 'default', rep_name: repNameInput.value.trim() });
+      } else if (settingsRow && settingsRow.rep_name) {
+        repNameInput.value = settingsRow.rep_name;
+        safeSetRaw(REP_KEY, settingsRow.rep_name);
+      }
+
+      await refreshContactsFromCloud();
+    } catch (e) {
+      setSyncStatus('local');
+      return;
+    }
+
+    cloudReady = true;
+    setSyncStatus('cloud');
+
+    sb.channel('contacts-sync')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'contacts' }, () => {
+        refreshContactsFromCloud().catch(() => {});
+      })
+      .subscribe();
+
+    sb.channel('settings-sync')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'settings', filter: 'id=eq.default' }, (payload) => {
+        const newName = payload.new && payload.new.rep_name;
+        if (typeof newName === 'string' && document.activeElement !== repNameInput && newName !== repNameInput.value) {
+          repNameInput.value = newName;
+          safeSetRaw(REP_KEY, newName);
+          render();
+        }
+      })
+      .subscribe();
+  }
+
+  repNameInput.addEventListener('input', () => {
+    safeSetRaw(REP_KEY, repNameInput.value);
+    render(); // regenerate messages live if rep name changes
+    if (cloudReady) {
+      clearTimeout(repSaveTimer);
+      repSaveTimer = setTimeout(() => {
+        sb.from('settings').upsert({ id: 'default', rep_name: repNameInput.value.trim() }).then(() => {}).catch(() => {});
+      }, 600);
+    }
+  });
+
+
+  function repName() {
+    return repNameInput.value.trim() || 'el equipo de Ikaruga';
+  }
+
+  function buildMessage(tpl, nombre, idioma) {
+    const n = nombre.trim() || 'qué tal';
+    const rep = repName();
+    if (tpl === '1') {
+      const clause = idioma ? `arrancar con ${idioma}` : 'arrancar con un idioma';
+      return `¡Hola ${n}! 👋 Soy ${rep}, de Ikaruga. Vi que hace un tiempo dejaste tus datos para ${clause} y quería saber si seguís interesado/a.\n\nPara orientarte mejor, necesito conocer un poco tu situación (nivel, objetivo y disponibilidad) y así te paso las opciones que más te sirvan.\n\n¿Preferís que hablemos por acá o coordinamos una llamada corta?`;
+    }
+    if (tpl === '2') {
+      const clause = idioma ? `aprender ${idioma}` : 'aprender un idioma';
+      return `¡Hola ${n}! ⛩️ Soy ${rep}, de Ikaruga. Retomo el contacto porque nos habías dejado tus datos para ${clause} con nosotros.\n\n¿Seguís buscando arrancar? Si querés, te dejo nuestro Insta para que conozcas un poco más: https://www.instagram.com/ikaruga.idiomas/\n\nPara pasarte horarios y valores, antes necesito conocer tu nivel, tu objetivo y tu disponibilidad, así te oriento con la opción que mejor te quede.\n\n¿Charlamos por acá o preferís una llamada?`;
+    }
+    // tpl === '3'
+    if (idioma) {
+      return `¡Hola ${n}! 👋 Soy ${rep}, de Ikaruga. Estamos por armar los próximos grupos de ${idioma} y quería ver si seguís interesado/a en retomar tu consulta.\n\nPara conseguirte el horario y la modalidad que mejor te cierren, contame: ¿para qué lo querés (viaje, trabajo, estudio) y qué días/horarios te quedan cómodos?\n\n¿Seguimos por acá o preferís que te llame?`;
+    }
+    return `¡Hola ${n}! 👋 Soy ${rep}, de Ikaruga. Estamos por armar los próximos grupos y quería ver si seguís interesado/a en retomar tu consulta sobre aprender un idioma.\n\nPara conseguirte el horario y la modalidad que mejor te cierren, contame: ¿qué idioma te interesa, para qué lo querés (viaje, trabajo, estudio) y qué días/horarios te quedan cómodos?\n\n¿Seguimos por acá o preferís que te llame?`;
+  }
+
+  function tplLabel(tpl) {
+    return tpl === '1' ? 'Corta y directa' : tpl === '2' ? 'Con Instagram' : 'Con urgencia';
+  }
+
+  function digitsOnly(str) {
+    return (str || '').replace(/[^0-9]/g, '');
+  }
+
+  function waHref(telefono, msg) {
+    const num = digitsOnly(telefono);
+    // api.whatsapp.com hace un salto menos que wa.me y suele engancharse mejor
+    // con WhatsApp Desktop cuando se abre desde una página como esta.
+    return num
+      ? `https://api.whatsapp.com/send?phone=${num}&text=${encodeURIComponent(msg)}`
+      : `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
+  }
+
+  function newContact(fields) {
+    return {
+      id: Date.now() + '-' + Math.random().toString(36).slice(2, 8),
+      sent: false,
+      sentAt: null,
+      ...fields
+    };
+  }
+
+  function formatDate(ts) {
+    if (!ts) return '';
+    try {
+      return new Date(ts).toLocaleString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+    } catch (e) {
+      return '';
+    }
+  }
+
+  function visibleContacts() {
+    if (currentFilter === 'pendientes') return contacts.filter((c) => !c.sent);
+    if (currentFilter === 'enviados') return contacts.filter((c) => c.sent);
+    return contacts;
+  }
+
+  function updateCounts() {
+    cntPendientes.textContent = `(${contacts.filter((c) => !c.sent).length})`;
+    cntEnviados.textContent = `(${contacts.filter((c) => c.sent).length})`;
+    cntTodos.textContent = `(${contacts.length})`;
+  }
+
+  function render() {
+    listEl.innerHTML = '';
+    updateCounts();
+    const visible = visibleContacts();
+
+    if (!contacts.length) {
+      emptyMsg.textContent = 'Todavía no cargaste ningún contacto.';
+    } else if (currentFilter === 'pendientes') {
+      emptyMsg.textContent = 'No tenés contactos pendientes. ¡Buen trabajo! 🎉';
+    } else if (currentFilter === 'enviados') {
+      emptyMsg.textContent = 'Todavía no marcaste ningún contacto como enviado.';
+    } else {
+      emptyMsg.textContent = 'Todavía no cargaste ningún contacto.';
+    }
+    emptyMsg.style.display = visible.length ? 'none' : 'block';
+
+    visible.forEach((c) => {
+      const msg = buildMessage(c.tpl, c.nombre, c.idioma);
+      const card = document.createElement('div');
+      card.className = 'card' + (c.sent ? ' sent' : '');
+
+      const metaParts = [];
+      if (c.telefono) metaParts.push(c.telefono);
+      if (c.idioma) metaParts.push(c.idioma);
+      metaParts.push(tplLabel(c.tpl));
+
+      const badge = c.sent ? `<span class="sent-badge">Enviado${c.sentAt ? ' · ' + formatDate(c.sentAt) : ''}</span>` : '';
+
+      card.innerHTML = `
+        <div class="card-head">
+          <div>
+            <div class="card-title">${escapeHtml(c.nombre || 'Sin nombre')}${badge}</div>
+            <div class="card-meta">${metaParts.map(escapeHtml).join(' <span class="dot">·</span> ')}</div>
+          </div>
+        </div>
+        <div class="msg-box">${escapeHtml(msg)}</div>
+        <div class="card-actions">
+          <button class="ghost copy-btn">Copiar mensaje</button>
+          <a class="ghost wa-link" href="${waHref(c.telefono, msg)}" target="_blank" rel="noopener noreferrer">Abrir WhatsApp</a>
+          ${c.telefono ? '<button class="text copy-num-btn">Copiar número</button>' : ''}
+          <button class="text toggle-sent-btn">${c.sent ? 'Marcar pendiente' : 'Marcar enviado'}</button>
+          <button class="text edit-btn">Editar</button>
+          <button class="text del-btn">Borrar</button>
+          <span class="copied-flag">Copiado ✓</span>
+        </div>
+      `;
+
+      card.querySelector('.copy-btn').addEventListener('click', async () => {
+        const flag = card.querySelector('.copied-flag');
+        const ok = await copyText(msg);
+        if (ok) {
+          flag.classList.add('show');
+          setTimeout(() => flag.classList.remove('show'), 1600);
+        }
+      });
+
+      const copyNumBtn = card.querySelector('.copy-num-btn');
+      if (copyNumBtn) {
+        copyNumBtn.addEventListener('click', async () => {
+          const flag = card.querySelector('.copied-flag');
+          const ok = await copyText(digitsOnly(c.telefono));
+          if (ok) {
+            flag.classList.add('show');
+            setTimeout(() => flag.classList.remove('show'), 1600);
+          }
+        });
+      }
+
+      card.querySelector('.wa-link').addEventListener('click', () => {
+        if (!c.sent) {
+          c.sent = true;
+          c.sentAt = Date.now();
+          persistContacts([c]);
+          render();
+        }
+      });
+
+      card.querySelector('.toggle-sent-btn').addEventListener('click', () => {
+        c.sent = !c.sent;
+        c.sentAt = c.sent ? Date.now() : null;
+        persistContacts([c]);
+        render();
+      });
+
+      card.querySelector('.edit-btn').addEventListener('click', () => startEdit(c.id));
+      card.querySelector('.del-btn').addEventListener('click', () => {
+        contacts = contacts.filter((x) => x.id !== c.id);
+        cacheLocally();
+        removeContactCloud(c.id);
+        if (editingId === c.id) cancelEdit();
+        render();
+      });
+
+      listEl.appendChild(card);
+    });
+  }
+
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, (m) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[m]));
+  }
+
+  async function copyText(text) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch (e) {
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        return true;
+      } catch (e2) {
+        return false;
+      }
+    }
+  }
+
+  function currentTplSelection() {
+    const checked = document.querySelector('input[name="tpl"]:checked');
+    return checked ? checked.value : '1';
+  }
+
+  function setTplSelection(tpl) {
+    document.querySelectorAll('.tpl-option').forEach((el) => {
+      const isSel = el.dataset.tpl === tpl;
+      el.classList.toggle('selected', isSel);
+      el.querySelector('input').checked = isSel;
+    });
+  }
+
+  document.querySelectorAll('.tpl-option').forEach((el) => {
+    el.addEventListener('click', () => setTplSelection(el.dataset.tpl));
+  });
+
+  function clearForm() {
+    $('#fNombre').value = '';
+    $('#fTelefono').value = '';
+    $('#fIdioma').value = '';
+    setTplSelection('1');
+  }
+
+  function startEdit(id) {
+    const c = contacts.find((x) => x.id === id);
+    if (!c) return;
+    editingId = id;
+    $('#fNombre').value = c.nombre;
+    $('#fTelefono').value = c.telefono;
+    $('#fIdioma').value = c.idioma;
+    setTplSelection(c.tpl);
+    addBtn.textContent = 'Guardar cambios';
+    editingFlag.textContent = `Editando a ${c.nombre || 'contacto'}`;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function cancelEdit() {
+    editingId = null;
+    addBtn.textContent = 'Agregar contacto';
+    editingFlag.textContent = '';
+    clearForm();
+  }
+
+  const bulkText = $('#bulkText');
+  const detectBtn = $('#detectBtn');
+  const bulkAddBtn = $('#bulkAddBtn');
+  const bulkFlag = $('#bulkFlag');
+  const mappingBox = $('#mappingBox');
+  const mapNombre = $('#mapNombre');
+  const mapTelefono = $('#mapTelefono');
+  const mapIdioma = $('#mapIdioma');
+  const previewBox = $('#previewBox');
+
+  let bulkState = { delimiter: '\t', rows: [] };
+
+  const LANGUAGE_HINTS = ['ingles', 'frances', 'aleman', 'italiano', 'portugues', 'chino', 'mandarin', 'ruso', 'arabe', 'coreano', 'japones'];
+  function normalize(str) {
+    return (str || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+  }
+  function looksLikePhone(str) {
+    const d = digitsOnly(str);
+    return d.length >= 8 && d.length <= 15 && d.length >= String(str || '').replace(/[\s]/g, '').length - 3;
+  }
+  function looksLikeLanguage(str) {
+    const n = normalize(str);
+    return LANGUAGE_HINTS.some((h) => n.includes(h));
+  }
+
+  function splitRow(line, delimiter) {
+    return line.split(delimiter).map((p) => p.trim().replace(/^["']|["']$/g, ''));
+  }
+
+  function autoDelimiter(line) {
+    if (line.includes('\t')) return '\t';
+    if (line.includes(',')) return ',';
+    return /\s{2,}/;
+  }
+
+  detectBtn.addEventListener('click', () => {
+    const lines = bulkText.value.split('\n').map((l) => l.trim()).filter(Boolean);
+    if (!lines.length) {
+      bulkFlag.textContent = 'Pegá algo primero.';
+      mappingBox.style.display = 'none';
+      return;
+    }
+    const manualDelim = $('#delimSelect').value;
+    const delimiter = manualDelim !== 'auto' ? manualDelim : autoDelimiter(lines[0]);
+    const rows = lines.map((l) => splitRow(l, delimiter));
+    const colCount = Math.max(...rows.map((r) => r.length));
+    if (colCount < 2) {
+      bulkFlag.textContent = 'No detecté columnas separadas. Probá elegir el separador manualmente arriba.';
+      mappingBox.style.display = 'none';
+      return;
+    }
+    bulkState = { delimiter, rows };
+
+    // Heurística para pre-seleccionar columnas
+    let guessTelefono = 0, guessIdioma = -1;
+    for (let c = 0; c < colCount; c++) {
+      const sampleVals = rows.map((r) => r[c] || '').filter(Boolean);
+      if (!sampleVals.length) continue;
+      if (sampleVals.filter(looksLikePhone).length >= Math.ceil(sampleVals.length * 0.6)) guessTelefono = c;
+      if (sampleVals.filter(looksLikeLanguage).length >= Math.ceil(sampleVals.length * 0.5)) guessIdioma = c;
+    }
+
+    function fillSelect(sel, selected, allowNone) {
+      sel.innerHTML = '';
+      if (allowNone) {
+        const optNone = document.createElement('option');
+        optNone.value = '-1';
+        optNone.textContent = '(no tengo esta columna)';
+        sel.appendChild(optNone);
+      }
+      for (let c = 0; c < colCount; c++) {
+        const opt = document.createElement('option');
+        opt.value = String(c);
+        const sample = (rows[0][c] || '').slice(0, 24);
+        opt.textContent = `Columna ${c + 1}: ${sample || '(vacío)'}`;
+        sel.appendChild(opt);
+      }
+      sel.value = String(selected);
+    }
+
+    fillSelect(mapNombre, 0, false);
+    fillSelect(mapTelefono, guessTelefono, false);
+    fillSelect(mapIdioma, guessIdioma, true);
+
+    updatePreview();
+    mappingBox.style.display = 'block';
+    bulkFlag.textContent = `${rows.length} fila${rows.length === 1 ? '' : 's'} detectada${rows.length === 1 ? '' : 's'}.`;
+  });
+
+  function updatePreview() {
+    const ni = parseInt(mapNombre.value, 10);
+    const ti = parseInt(mapTelefono.value, 10);
+    const li = parseInt(mapIdioma.value, 10);
+    const rows = bulkState.rows;
+
+    const rowsHtml = rows.map((r) => {
+      const nombre = (r[ni] || '').trim();
+      const telefono = (r[ti] || '').trim();
+      const idioma = li >= 0 ? (r[li] || '').trim() : '';
+      const nombreCell = nombre ? escapeHtml(nombre) : '<span style="color:var(--danger)">(sin nombre)</span>';
+      const telCell = telefono ? escapeHtml(telefono) : '<span style="color:var(--ink-soft)">—</span>';
+      const idiCell = idioma ? escapeHtml(idioma) : '<span style="color:var(--ink-soft)">—</span>';
+      return `<tr><td>${nombreCell}</td><td>${telCell}</td><td>${idiCell}</td></tr>`;
+    }).join('');
+
+    previewBox.innerHTML = `
+      <table class="preview-table">
+        <thead><tr><th>Nombre</th><th>Teléfono</th><th>Idioma</th></tr></thead>
+        <tbody>${rowsHtml}</tbody>
+      </table>
+    `;
+    bulkAddBtn.textContent = `Importar ${rows.length} contacto${rows.length === 1 ? '' : 's'}`;
+  }
+  [mapNombre, mapTelefono, mapIdioma].forEach((sel) => sel.addEventListener('change', updatePreview));
+
+  bulkAddBtn.addEventListener('click', () => {
+    const ni = parseInt(mapNombre.value, 10);
+    const ti = parseInt(mapTelefono.value, 10);
+    const li = parseInt(mapIdioma.value, 10);
+    const tpl = currentTplSelection();
+    let added = 0;
+    const newOnes = [];
+
+    bulkState.rows.forEach((r) => {
+      const nombre = (r[ni] || '').trim();
+      if (!nombre) return;
+      const telefono = (r[ti] || '').trim();
+      const idioma = li >= 0 ? (r[li] || '').trim() : '';
+      const c = newContact({ nombre, telefono, idioma, tpl });
+      contacts.unshift(c);
+      newOnes.push(c);
+      added++;
+    });
+
+    if (added) {
+      persistContacts(newOnes);
+      render();
+      bulkText.value = '';
+      mappingBox.style.display = 'none';
+      bulkFlag.textContent = `${added} contacto${added === 1 ? '' : 's'} agregado${added === 1 ? '' : 's'} ✓`;
+      setTimeout(() => { bulkFlag.textContent = ''; }, 3000);
+    }
+  });
+
+  addBtn.addEventListener('click', () => {
+    const nombre = $('#fNombre').value.trim();
+    const telefono = $('#fTelefono').value.trim();
+    const idioma = $('#fIdioma').value.trim();
+    const tpl = currentTplSelection();
+
+    if (!nombre) {
+      $('#fNombre').focus();
+      return;
+    }
+
+    if (editingId) {
+      const c = contacts.find((x) => x.id === editingId);
+      if (c) {
+        c.nombre = nombre; c.telefono = telefono; c.idioma = idioma; c.tpl = tpl;
+        persistContacts([c]);
+      }
+      cancelEdit();
+    } else {
+      const c = newContact({ nombre, telefono, idioma, tpl });
+      contacts.unshift(c);
+      persistContacts([c]);
+      clearForm();
+    }
+    render();
+  });
+
+  initCloud();
+
+  render();
+})();
+</script>
+</body>
+</html>
