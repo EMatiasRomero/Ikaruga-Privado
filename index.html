@@ -284,6 +284,32 @@
   }
   .preview-table th { color: var(--ink-soft); font-weight: 500; }
   .preview-wrap { overflow-x: auto; }
+  .help-box {
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-card);
+    padding: 16px 20px;
+    margin-bottom: 22px;
+  }
+  .help-box summary {
+    cursor: pointer;
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 16px;
+    list-style: none;
+  }
+  .help-box summary::-webkit-details-marker { display: none; }
+  .help-box summary::before { content: '❓ '; }
+  .help-box[open] summary { margin-bottom: 12px; }
+  .help-box ul { margin: 10px 0 0; padding-left: 20px; }
+  .help-box li { margin-bottom: 8px; font-size: 13.5px; line-height: 1.5; }
+  .help-box code {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 1px 5px;
+    font-size: 12.5px;
+  }
   footer.hint {
     text-align: center;
     color: var(--ink-soft);
@@ -305,6 +331,18 @@
       <input id="repName" type="text" placeholder="Tu nombre">
     </div>
   </header>
+
+  <details class="help-box">
+    <summary>Cómo usar esta herramienta</summary>
+    <ul>
+      <li><strong>Plantillas:</strong> escribí tus mensajes usando <code>{nombre}</code>, <code>{idioma}</code> y <code>{rep}</code>. Se completan solos con los datos de cada contacto.</li>
+      <li><strong>{nombre} usa solo el primer nombre</strong> aunque hayas cargado el nombre completo (ej: "Alejandro David Mancuello" → el mensaje dice "Alejandro"). El resto del nombre solo se ve en la lista, para identificar bien a cada persona.</li>
+      <li><strong>Si falta un dato:</strong> sin nombre, el mensaje dice "qué tal"; sin idioma, dice "un idioma" — así el mensaje nunca queda roto.</li>
+      <li><strong>Tandas:</strong> cada vez que importás desde tu planilla, ponele un nombre a esa tanda (por defecto usa la fecha y hora). Después podés filtrar la lista de contactos por tanda para no mezclarlas.</li>
+      <li><strong>Pendientes / Enviados:</strong> al tocar "Abrir WhatsApp" el contacto pasa solo a "Enviado", con la fecha y la plantilla que usaste. Si necesitás corregirlo, usá el botón "Marcar pendiente/enviado" de cada tarjeta.</li>
+      <li><strong>☁️ Sincronizado</strong> (arriba a la derecha) significa que lo que cargues acá se va a ver igual en cualquier otro dispositivo donde abras este mismo link.</li>
+    </ul>
+  </details>
 
   <section>
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
@@ -664,8 +702,14 @@
     return repNameInput.value.trim() || 'el equipo de Ikaruga';
   }
 
+  function firstNameOf(str) {
+    const trimmed = (str || '').trim();
+    if (!trimmed) return '';
+    return trimmed.split(/\s+/)[0];
+  }
+
   function fillTemplate(body, nombre, idioma) {
-    const n = (nombre || '').trim() || 'qué tal';
+    const n = firstNameOf(nombre) || 'qué tal';
     const idiomaText = (idioma || '').trim() || 'un idioma';
     const rep = repName();
     return (body || '')
@@ -945,6 +989,7 @@
   const tplForm = $('#tplForm');
   const tplFormName = $('#tplFormName');
   const tplFormBody = $('#tplFormBody');
+  const tplFlag = document.createElement('span');
 
   function openTplForm(id) {
     editingTplId = id || null;
